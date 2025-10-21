@@ -57,9 +57,27 @@ $NomPoste = $env:COMPUTERNAME
 $NomUtilisateur = $env:USERNAME
 
 # Type et version de Windows
-$TypeWindows = $InfosSysteme.WindowsProductName
-$VersionWindows = $InfosSysteme.WindowsVersion
+# Type et version de Windows avec detection correcte Win10 vs Win11
 $BuildWindows = $InfosSysteme.OsBuildNumber
+
+# Detecter Windows 11 (build >= 22000)
+if ([int]$BuildWindows -ge 22000) {
+    $TypeWindows = "Windows 11 Pro"
+    # Determiner la version basee sur le build
+    if ([int]$BuildWindows -ge 26100) {
+        $VersionWindows = "24H2"
+    } elseif ([int]$BuildWindows -ge 22631) {
+        $VersionWindows = "23H2"
+    } elseif ([int]$BuildWindows -ge 22621) {
+        $VersionWindows = "22H2"
+    } else {
+        $VersionWindows = "21H2"
+    }
+} else {
+    # C'est Windows 10
+    $TypeWindows = "Windows 10 Pro"
+    $VersionWindows = $InfosSysteme.WindowsVersion
+}
 
 # Numero de serie materiel (UUID)
 try {
