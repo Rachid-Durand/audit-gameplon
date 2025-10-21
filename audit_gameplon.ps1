@@ -283,8 +283,37 @@ if (Test-Path "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe") { 
 $NavigateurTexte = if ($Navigateurs.Count -gt 0) { $Navigateurs -join ", " } else { "Edge (par defaut)" }
 
 # Versions logiciels gaming
-$VersionSteam = if (Test-Path "C:\Program Files (x86)\Steam\steam.exe") { "Installe" } else { "Non installe" }
-$VersionOBS = if (Test-Path "C:\Program Files\obs-studio\bin\64bit\obs64.exe") { "Installe" } else { "Non installe" }
+# Steam - recuperer la version
+if (Test-Path "C:\Program Files (x86)\Steam\steam.exe") {
+    try {
+        $SteamVersion = (Get-Item "C:\Program Files (x86)\Steam\steam.exe").VersionInfo.FileVersion
+        if ($SteamVersion) {
+            $VersionSteam = $SteamVersion
+        } else {
+            $VersionSteam = "Installe (version inconnue)"
+        }
+    } catch {
+        $VersionSteam = "Installe (version inconnue)"
+    }
+} else {
+    $VersionSteam = "Non installe"
+}
+
+# OBS Studio - recuperer la version
+if (Test-Path "C:\Program Files\obs-studio\bin\64bit\obs64.exe") {
+    try {
+        $OBSVersion = (Get-Item "C:\Program Files\obs-studio\bin\64bit\obs64.exe").VersionInfo.FileVersion
+        if ($OBSVersion) {
+            $VersionOBS = $OBSVersion
+        } else {
+            $VersionOBS = "Installe (version inconnue)"
+        }
+    } catch {
+        $VersionOBS = "Installe (version inconnue)"
+    }
+} else {
+    $VersionOBS = "Non installe"
+}
 
 Write-Host "  [OK] Antivirus : $AntivirusActif" -ForegroundColor Green
 Write-Host "  [OK] Pare-feu : $PareFeuActif | UAC : $UACActif" -ForegroundColor Green
