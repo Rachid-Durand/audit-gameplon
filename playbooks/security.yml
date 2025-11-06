@@ -1,0 +1,37 @@
+---
+- name: Tâche de Sécurité - Renforcement SSH et UFW
+  hosts: minilab
+  become: yes 
+  
+  tasks:
+    - name: 1. Installer le pare-feu UFW
+      ansible.builtin.apt:
+        name: ufw
+        state: present
+        update_cache: yes
+      when: ansible_os_family == "Debian"
+
+    - name: 2. Configurer les règles UFW
+      community.general.ufw:
+        rule: allow
+        port: '22'
+        proto: tcp
+      
+    - name: 3. Refuser toutes les connexions entrantes par défaut
+      community.general.ufw:
+        state: enabled
+        policy: deny
+        # Important : Assurez-vous d'avoir bien autorisé le port 22 avant d'activer le pare-feu !
+
+    - name: 4. Désactiver la connexion root SSH directe
+      ansible.builtin.lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^PermitRootLogin'
+        line: 'PermitRootLogin no'
+        state: present
+        validate: 'sshd -t -f %s'
+
+    - name: 5. Redémarrer le service SSH pour appliquer les changements
+      ansible.builtin.service:
+        name: ssh
+        state: restarted
