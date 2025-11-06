@@ -1,0 +1,32 @@
+---
+- name: Tâche de Maintenance et Mise à Jour du Serveur lab-05
+  # Cible les hôtes du groupe 'minilab' que nous avons défini dans l'inventaire Semaphore
+  hosts: minilab
+  # Indique à Ansible d'utiliser l'élévation de privilèges (sudo) pour les mises à jour
+  become: yes 
+  
+  tasks:
+    - name: 1. Mise à jour du cache APT (pour Debian/Ubuntu)
+      ansible.builtin.apt:
+        update_cache: yes
+      when: ansible_os_family == "Debian"
+
+    - name: 2. Mise à jour de tous les paquets installés
+      ansible.builtin.apt:
+        upgrade: dist
+      when: ansible_os_family == "Debian"
+      
+    - name: 3. Suppression des dépendances inutiles et des anciens paquets
+      ansible.builtin.apt:
+        autoremove: yes
+        autoclean: yes
+      when: ansible_os_family == "Debian"
+
+    - name: 4. Redémarrage du serveur si nécessaire (après mise à jour du kernel par exemple)
+      ansible.builtin.shell:
+        cmd: sleep 2 && shutdown -r now "Ansible redémarrage après mise à jour"
+        free_form: yes
+      args:
+        # Cette condition vérifie si le fichier /var/run/reboot-required existe
+        removes: /var/run/reboot-required
+      ignore_errors: yes
